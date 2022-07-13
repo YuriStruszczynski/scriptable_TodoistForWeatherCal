@@ -20,23 +20,23 @@ const custom = {
 		const todoistPath = files.joinPath(files.libraryDirectory(), url+"todoist")
 		let todoistData = code.getCache(todoistPath, 1, 1440)
 		if (!todoistData || todoistData.cacheExpired) {
-		try {
-			let req = new Request(url)
-			req.headers = {"Authorization":"Bearer "+bearer}
-			let rawData = await req.loadJSON()
-			
-			todoistData = []
-			for (item of rawData) {
-			const listing = {}
-			listing.title = item.content
-			listing.link = item.url
-			 listing.prio = item.priority
-			 listing.isOverdue = false
-			 listing.dueDate = item.due ? new Date(item.due.date) : null
-			todoistData.push(listing)
-			}
-			files.writeString(todoistPath, JSON.stringify(todoistData))
-		} catch {}
+			try {
+				let req = new Request(url)
+				req.headers = {"Authorization":"Bearer "+bearer}
+				let rawData = await req.loadJSON()
+				
+				todoistData = []
+				for (item of rawData) {
+					const listing = {}
+					listing.title = item.content
+					listing.link = item.url
+					listing.prio = item.priority
+					listing.isOverdue = false
+					listing.dueDate = item.due ? new Date(item.due.date) : null
+					todoistData.push(listing)
+				}
+				files.writeString(todoistPath, JSON.stringify(todoistData))
+			} catch {}
 		}
 		
 		const reminderSettings = code.settings.reminders
@@ -61,54 +61,54 @@ const custom = {
 		const colorShape = showListColor.includes("circle") ? "circle" : "rectangle"
 
 		for (let i = 0; i < numberOfReminders; i++) {
-		const reminder = todoistData[i]
+			const reminder = todoistData[i]
 
-		const titleStack = code.align(reminderStack)
-		titleStack.layoutHorizontally()	
-		titleStack.url = "https://todoist.com/showTask"//reminder.link
+			const titleStack = code.align(reminderStack)
+			titleStack.layoutHorizontally()	
+			titleStack.url = "https://todoist.com/showTask"//reminder.link
 
-		// TODO: Functionize for events and reminders
-		if (showListColor.length && showListColor != "none" && !showListColor.includes("right")) {
-			let colorItemText = code.provideTextSymbol(colorShape) + " "
-			let colorItem = code.provideText(colorItemText, titleStack, code.format.reminderTitle)
-			colorItem.textColor = Color.red()
-		}
+			// TODO: Functionize for events and reminders
+			if (showListColor.length && showListColor != "none" && !showListColor.includes("right")) {
+				let colorItemText = code.provideTextSymbol(colorShape) + " "
+				let colorItem = code.provideText(colorItemText, titleStack, code.format.reminderTitle)
+				colorItem.textColor = Color.red()
+			}
 
-		const title = code.provideText(reminder.title.trim(), titleStack, code.format.reminderTitle)
-		titleStack.setPadding(code.padding, code.padding, code.padding/5, code.padding)
+			const title = code.provideText(reminder.title.trim(), titleStack, code.format.reminderTitle)
+			titleStack.setPadding(code.padding, code.padding, code.padding/5, code.padding)
 
-		if (showListColor.length && showListColor != "none" && showListColor.includes("right")) {
-			let colorItemText = " " + code.provideTextSymbol(colorShape)
-			let colorItem = code.provideText(colorItemText, titleStack, code.format.reminderTitle)
-			colorItem.textColor = Color.red()
-		}
+			if (showListColor.length && showListColor != "none" && showListColor.includes("right")) {
+				let colorItemText = " " + code.provideTextSymbol(colorShape)
+				let colorItem = code.provideText(colorItemText, titleStack, code.format.reminderTitle)
+				colorItem.textColor = Color.red()
+			}
 
-		if (reminder.isOverdue) { title.textColor = Color.red() }
-		if (reminder.isOverdue || !reminder.dueDate) { continue }
+			if (reminder.isOverdue) { title.textColor = Color.red() }
+			if (reminder.isOverdue || !reminder.dueDate) { continue }
 
-		let timeText
-		if (reminderSettings.useRelativeDueDate) {
-			const rdf = new RelativeDateTimeFormatter()
-			rdf.locale = code.locale
-			rdf.useNamedDateTimeStyle()
-			timeText = rdf.string(reminder.dueDate, code.now)
+			let timeText
+			if (reminderSettings.useRelativeDueDate) {
+				const rdf = new RelativeDateTimeFormatter()
+				rdf.locale = code.locale
+				rdf.useNamedDateTimeStyle()
+				timeText = rdf.string(reminder.dueDate, code.now)
 
-		} else {
-			const df = new DateFormatter()
-			df.locale = code.locale
+			} else {
+				const df = new DateFormatter()
+				df.locale = code.locale
 
-			if (code.dateDiff(reminder.dueDate, code.now) == 0 && reminder.dueDateIncludesTime) { df.useNoDateStyle() }
-			else { df.useShortTimeStyle() }
+				if (code.dateDiff(reminder.dueDate, code.now) == 0 && reminder.dueDateIncludesTime) { df.useNoDateStyle() }
+				else { df.useShortTimeStyle() }
 
-			if (reminder.dueDateIncludesTime ){ df.useShortTimeStyle() }
-			else { df.useNoTimeStyle() }
+				if (reminder.dueDateIncludesTime ){ df.useShortTimeStyle() }
+				else { df.useNoTimeStyle() }
 
-			timeText = df.string(reminder.dueDate)
-		}
+				timeText = df.string(reminder.dueDate)
+			}
 
-		const timeStack = code.align(reminderStack)
-		const time = code.provideText(timeText, timeStack, code.format.eventTime)
-		timeStack.setPadding(0, code.padding, code.padding, code.padding)
+			const timeStack = code.align(reminderStack)
+			const time = code.provideText(timeText, timeStack, code.format.eventTime)
+			timeStack.setPadding(0, code.padding, code.padding, code.padding)
 		}
 	}
 }
